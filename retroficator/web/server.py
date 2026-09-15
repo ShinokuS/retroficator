@@ -14,7 +14,7 @@ from PIL import Image, UnidentifiedImageError
 
 from retroficator.core.pipeline import AssetPipeline, ProcessOptions
 
-app = FastAPI(title="Retroficator", version="0.1.0")
+app = FastAPI(title="Retroficator", version="0.2.0")
 _pipeline = AssetPipeline()
 _STATIC_DIR = Path(__file__).with_name("static")
 
@@ -53,6 +53,7 @@ async def process_asset(
     background_tolerance: float = Form(default=24.0),
     binary_alpha: bool = Form(default=True),
     alpha_threshold: int = Form(default=128),
+    trim_transparent: bool = Form(default=True),
 ) -> dict:
     if max_colors < 2 or max_colors > 256:
         raise HTTPException(status_code=400, detail="max_colors must be between 2 and 256")
@@ -93,6 +94,7 @@ async def process_asset(
             palette_path=palette_path,
             binary_alpha=binary_alpha,
             alpha_threshold=alpha_threshold,
+            trim_transparent=trim_transparent,
         )
         result = _pipeline.process(source, options)
     except ValueError as exc:
