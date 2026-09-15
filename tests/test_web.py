@@ -37,6 +37,7 @@ def test_process_image() -> None:
             "max_colors": "8",
             "remove_background": "true",
             "binary_alpha": "true",
+            "trim_transparent": "false",
         },
     )
     assert response.status_code == 200
@@ -44,4 +45,5 @@ def test_process_image() -> None:
     assert data["report"]["width"] == 16
     assert data["report"]["height"] == 16
     assert data["report"]["opaque_colors"] <= 8
+    assert data["grid"]["backend"] == "manual-scale"
     assert data["image_base64"]
