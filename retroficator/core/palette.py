@@ -71,17 +71,28 @@ def map_to_palette(image: Image.Image, colors: list[tuple[int, int, int]]) -> Im
 
 
 def quantize_colors(image: Image.Image, max_colors: int = 24) -> Image.Image:
-    max_colors = max(2, min(256, int(max_colors)))
-    rgba = image.convert("RGBA")
-    arr = np.asarray(rgba, dtype=np.uint8)
-    alpha = arr[..., 3]
+    """Reduce only visible sprite pixels, never hidden RGB in transparency.
 
-    rgb = Image.fromarray(arr[..., :3], mode="RGB")
-    q = rgb.quantize(colors=max_colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
-    qrgb = q.convert("RGB")
-    out = np.asarray(qrgb, dtype=np.uint8).copy()
-    rgba_out = np.dstack([out, alpha])
-    return Image.fromarray(rgba_out, mode="RGBA")
+    Image generators often leave arbitrary RGB under alpha=0. Feeding those
+    invisible colours to a global quantizer wastes palette entries and can erase
+    rare highlights or dark outline shades from the actual sprite.
+    """
+    max_colors = max(2, min(256, int(max_colors)))
+    rgba = np.asarray(image.convert("RGBA"), dtype=np.uint8).copy()
+    alpha = rgba[..., 3]
+    visible = alpha > 0
+    if not np.any(visible):
+        rgba[..., :3] = 0
+        return Image.fromarray(rgba, mode="RGBA")
+
+    pixels = rgba[..., :3][visible]
+    strip = Image.fromarray(pixels.reshape(1, -1, 3), mode="RGB")
+    q = strip.quantize(colors=max_colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    reduced = np.asarray(q.convert("RGB"), dtype=np.uint8).reshape(-1, 3)
+
+    rgba[..., :3][visible] = reduced
+    rgba[..., :3][~visible] = 0
+    return Image.fromarray(rgba, mode="RGBA")
 
 
 def select_project_palette(
