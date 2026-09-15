@@ -34,6 +34,7 @@ def test_process_image() -> None:
             "auto_grid": "false",
             "scale_x": "1",
             "scale_y": "1",
+            "limit_colors": "true",
             "max_colors": "8",
             "remove_background": "true",
             "binary_alpha": "true",
@@ -46,4 +47,6 @@ def test_process_image() -> None:
     assert data["report"]["height"] == 16
     assert data["report"]["opaque_colors"] <= 8
     assert data["grid"]["backend"] == "manual-scale"
+    assert data["processing"]["limit_colors"] is True
+    assert data["processing"]["binary_alpha"] is True
     assert data["image_base64"]
