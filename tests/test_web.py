@@ -39,6 +39,11 @@ def test_process_image() -> None:
             "remove_background": "true",
             "binary_alpha": "true",
             "trim_transparent": "false",
+            "crisp_edges": "true",
+            "edge_alpha_threshold": "18",
+            "repair_outline": "true",
+            "outline_strength": "70",
+            "outer_outline": "0",
         },
     )
     assert response.status_code == 200
@@ -49,4 +54,7 @@ def test_process_image() -> None:
     assert data["grid"]["backend"] == "manual-scale"
     assert data["processing"]["limit_colors"] is True
     assert data["processing"]["binary_alpha"] is True
+    assert data["processing"]["repair_outline"] is True
+    assert data["processing"]["outline_strength"] == 70
+    assert data["processing"]["outer_outline"] == 0
     assert data["image_base64"]
