@@ -20,6 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--background-tolerance", type=float, default=24.0)
     parser.add_argument("--palette", type=str, default=None, help="Text/GPL-like file containing #RRGGBB colors")
     parser.add_argument("--keep-soft-alpha", action="store_true", help="Do not force alpha to 0/255")
+    parser.add_argument("--keep-margins", action="store_true", help="Do not crop transparent margins after recovery")
     return parser
 
 
@@ -39,6 +40,7 @@ def main(argv: list[str] | None = None) -> int:
         background_tolerance=args.background_tolerance,
         palette_path=args.palette,
         binary_alpha=not args.keep_soft_alpha,
+        trim_transparent=not args.keep_margins,
     )
 
     with Image.open(args.input) as image:
@@ -47,9 +49,11 @@ def main(argv: list[str] | None = None) -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     result.image.save(args.output)
     print(
-        f"Saved {args.output} | {result.report.width}x{result.report.height} | "
-        f"{result.report.opaque_colors} colors | auto grid "
-        f"{result.grid.scale_x}x{result.grid.scale_y} ({result.grid.confidence:.0%})"
+        f"Saved {args.output} | output {result.report.width}x{result.report.height} | "
+        f"native grid {result.grid.cols}x{result.grid.rows} | "
+        f"cell {result.grid.step_x:.2f}x{result.grid.step_y:.2f}px | "
+        f"{result.report.opaque_colors} colors | "
+        f"{result.grid.backend} confidence={result.grid.confidence}"
     )
     return 0
 
