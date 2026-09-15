@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "retroficator"
+version = "0.2.0"
+description = "AI-friendly pixel-art asset cleanup and normalization utility"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "ShinokuS"}]
+dependencies = [
+  "numpy>=2.0",
+  "Pillow>=11.0",
+  "fastapi>=0.116",
+  "uvicorn[standard]>=0.35",
+  "python-multipart>=0.0.20",
+  "pixelfixer @ git+https://github.com/Retro-Diffusion/pixel-art-fixer.git@ef376e57e1c272633ca2dbf5f29ec3fcf6596465#subdirectory=python",
+]
+
+[project.optional-dependencies]
+gui = ["PySide6>=6.8"]
+dev = ["pytest>=8.0", "httpx>=0.28"]
+
+[project.scripts]
+retroficator = "retroficator.app:main"
+retroficator-web = "retroficator.web.server:run_web"
+retroficator-desktop = "retroficator.app:desktop_main"
+retroficator-cli = "retroficator.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+include = ["retroficator*"]
+
+[tool.setuptools.package-data]
+retroficator = ["web/static/*"]
