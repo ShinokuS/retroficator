@@ -10,15 +10,16 @@ The first prototype intentionally focuses on the processing core before a full e
 - deterministic recovery to a native-sized raster;
 - optional border-connected flat-background removal;
 - adaptive color reduction (default: 24 colors);
-- project-palette locking using perceptual Oklab color distance, while still respecting the per-asset color limit;
+- project-palette locking using perceptual Oklab color distance, while respecting the per-asset color limit;
 - binary-alpha cleanup for crisp sprite edges;
 - basic asset validation (dimensions, color count, alpha levels, tiny disconnected components);
-- a simple desktop GUI with drag-and-drop, before/after preview and PNG export;
-- a CLI for batchable processing.
+- a local web workspace with drag-and-drop, before/after previews, diagnostics and PNG export;
+- a CLI for batchable processing;
+- the original PySide desktop prototype as an optional fallback.
 
-The architecture keeps the processing engine separate from the UI so the same operations can later be exposed to a richer editor and to a ChatGPT plugin/tool surface.
+The processing engine is intentionally separate from the interface. The browser UI, CLI and future ChatGPT plugin can therefore call the same deterministic asset pipeline.
 
-## Install (Windows / macOS / Linux)
+## Install and run
 
 Python 3.11+ is required.
 
@@ -31,7 +32,7 @@ Windows PowerShell:
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -e ".[gui]"
+pip install -e .
 retroficator
 ```
 
@@ -40,15 +41,34 @@ macOS/Linux:
 ```bash
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -e '.[gui]'
+pip install -e .
 retroficator
 ```
 
-You can also launch it with:
+Retroficator starts a local server at `http://127.0.0.1:8765` and opens the browser automatically. Processing stays on the machine; the v0.1 server does not upload source assets to an external service.
+
+Alternative launch commands:
 
 ```bash
+retroficator-web
 python -m retroficator
 ```
+
+The old desktop prototype can still be used if needed:
+
+```bash
+pip install -e '.[gui]'
+retroficator-desktop
+```
+
+## Web workflow
+
+1. Drop a PNG, JPG or WebP into the Source area.
+2. Keep auto-grid enabled first, or force a known native output size such as 32×32 or 64×64.
+3. Choose the maximum per-asset color count.
+4. Optionally remove a flat edge-connected background and load a project `.hex` palette.
+5. Process the asset and inspect detected grid, output dimensions, color count, alpha levels and tiny components.
+6. Download the lossless PNG result.
 
 ## CLI
 
@@ -80,7 +100,7 @@ A palette file can be plain text; every line containing a `#RRGGBB` value is rea
 
 This is a **baseline we can test against real ChatGPT-generated assets**. The auto-grid detector is deliberately dependency-light and does not yet claim to match specialized research-grade pixel-grid recovery algorithms. The next milestone is to benchmark it against Pixel Art Fixer / Pixel Snapper on our own test corpus, then keep the best method or add a selectable backend.
 
-Likewise, v0.1 is not yet a full Aseprite/Pixelorama replacement: there are no layers, frame timeline, brushes or animation tools. Those belong in the editor layer after the asset-recovery pipeline is proven.
+v0.1 is not yet a full Aseprite/Pixelorama replacement: there are no layers, frame timeline, brushes or animation tools. Those belong in the editor layer after the asset-recovery pipeline is proven.
 
 ## Suggested evaluation workflow
 
@@ -97,4 +117,4 @@ pip install -e '.[dev]'
 pytest
 ```
 
-The repository uses MIT licensing so the processing core can later be embedded in a desktop editor or other tooling without copyleft constraints.
+The repository uses MIT licensing so the processing core can later be embedded in other tooling without copyleft constraints.
