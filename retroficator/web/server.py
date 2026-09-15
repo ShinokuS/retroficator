@@ -14,7 +14,7 @@ from PIL import Image, UnidentifiedImageError
 
 from retroficator.core.pipeline import AssetPipeline, ProcessOptions
 
-app = FastAPI(title="Retroficator", version="0.2.0")
+app = FastAPI(title="Retroficator", version="0.2.1")
 _pipeline = AssetPipeline()
 _STATIC_DIR = Path(__file__).with_name("static")
 
@@ -48,10 +48,11 @@ async def process_asset(
     scale_y: int = Form(default=1),
     target_width: int | None = Form(default=None),
     target_height: int | None = Form(default=None),
+    limit_colors: bool = Form(default=False),
     max_colors: int = Form(default=24),
     remove_background: bool = Form(default=False),
     background_tolerance: float = Form(default=24.0),
-    binary_alpha: bool = Form(default=True),
+    binary_alpha: bool = Form(default=False),
     alpha_threshold: int = Form(default=128),
     trim_transparent: bool = Form(default=True),
 ) -> dict:
@@ -88,6 +89,7 @@ async def process_asset(
             scale_y=scale_y,
             target_width=target_width,
             target_height=target_height,
+            limit_colors=limit_colors,
             max_colors=max_colors,
             remove_background=remove_background,
             background_tolerance=background_tolerance,
@@ -115,6 +117,12 @@ async def process_asset(
         "grid": asdict(result.grid),
         "report": result.report.to_dict(),
         "source": {"width": source.width, "height": source.height},
+        "processing": {
+            "limit_colors": limit_colors,
+            "max_colors": max_colors if limit_colors else None,
+            "binary_alpha": binary_alpha,
+            "palette_locked": bool(palette_path),
+        },
     }
 
 
