@@ -8,6 +8,7 @@ from PIL import Image
 from .alpha import normalize_alpha
 from .asset import trim_transparent
 from .background import remove_flat_background
+from .outline import add_outer_outline, crisp_silhouette, repair_outline
 from .palette import load_hex_palette, map_to_palette, quantize_colors, select_project_palette
 from .recovery import RecoveryInfo, recover_auto, recover_manual_scale, recover_manual_size
 from .validation import ValidationReport, validate_asset
@@ -36,6 +37,14 @@ class ProcessOptions:
     trim_padding: int = 1
     trim_alpha_threshold: int = 8
     recovery_mode: str = "full"
+    # Fidelity-preserving edge cleanup. Unlike binary alpha or a blanket black
+    # stroke, these operations follow the recovered silhouette and existing
+    # outline colours.
+    crisp_edges: bool = True
+    edge_alpha_threshold: int = 18
+    repair_outline: bool = True
+    outline_strength: int = 70
+    outer_outline: int = 0
 
 
 @dataclass
@@ -61,6 +70,11 @@ class AssetPipeline:
 
         if options.binary_alpha:
             work = normalize_alpha(work, threshold=options.alpha_threshold)
+        elif options.crisp_edges:
+            # Preserve weak recovered edge cells instead of deleting them with a
+            # global alpha cut. This fixes the common "one side lost its border"
+            # failure on transparent AI-generated sprites.
+            work = crisp_silhouette(work, alpha_threshold=options.edge_alpha_threshold)
 
         # Crop the empty model canvas before optional colour reduction. Besides
         # making a useful game asset, this prevents invisible RGB values in the
@@ -79,6 +93,22 @@ class AssetPipeline:
             work = map_to_palette(work, selected)
         elif options.limit_colors:
             work = quantize_colors(work, max_colors=options.max_colors)
+
+        # Outline restoration happens after all colour constraints so later
+        # quantisation cannot erase the repaired edge again.
+        if options.repair_outline:
+            work = repair_outline(
+                work,
+                strength=options.outline_strength,
+                alpha_threshold=options.edge_alpha_threshold,
+            )
+
+        if options.outer_outline > 0:
+            work = add_outer_outline(
+                work,
+                thickness=options.outer_outline,
+                alpha_threshold=options.edge_alpha_threshold,
+            )
 
         report = validate_asset(work)
         return ProcessResult(image=work, grid=grid, report=report)
