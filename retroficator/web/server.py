@@ -14,7 +14,7 @@ from PIL import Image, UnidentifiedImageError
 
 from retroficator.core.pipeline import AssetPipeline, ProcessOptions
 
-app = FastAPI(title="Retroficator", version="0.2.1")
+app = FastAPI(title="Retroficator", version="0.3.0")
 _pipeline = AssetPipeline()
 _STATIC_DIR = Path(__file__).with_name("static")
 
@@ -55,6 +55,11 @@ async def process_asset(
     binary_alpha: bool = Form(default=False),
     alpha_threshold: int = Form(default=128),
     trim_transparent: bool = Form(default=True),
+    crisp_edges: bool = Form(default=True),
+    edge_alpha_threshold: int = Form(default=18),
+    repair_outline: bool = Form(default=True),
+    outline_strength: int = Form(default=70),
+    outer_outline: int = Form(default=0),
 ) -> dict:
     if max_colors < 2 or max_colors > 256:
         raise HTTPException(status_code=400, detail="max_colors must be between 2 and 256")
@@ -62,6 +67,12 @@ async def process_asset(
         raise HTTPException(status_code=400, detail="scale values must be >= 1")
     if (target_width is None) != (target_height is None):
         raise HTTPException(status_code=400, detail="target width and height must be set together")
+    if outline_strength < 0 or outline_strength > 100:
+        raise HTTPException(status_code=400, detail="outline_strength must be between 0 and 100")
+    if outer_outline < 0 or outer_outline > 4:
+        raise HTTPException(status_code=400, detail="outer_outline must be between 0 and 4")
+    if edge_alpha_threshold < 1 or edge_alpha_threshold > 254:
+        raise HTTPException(status_code=400, detail="edge_alpha_threshold must be between 1 and 254")
 
     payload = await image.read()
     if len(payload) > 25 * 1024 * 1024:
@@ -97,6 +108,11 @@ async def process_asset(
             binary_alpha=binary_alpha,
             alpha_threshold=alpha_threshold,
             trim_transparent=trim_transparent,
+            crisp_edges=crisp_edges,
+            edge_alpha_threshold=edge_alpha_threshold,
+            repair_outline=repair_outline,
+            outline_strength=outline_strength,
+            outer_outline=outer_outline,
         )
         result = _pipeline.process(source, options)
     except ValueError as exc:
@@ -122,6 +138,10 @@ async def process_asset(
             "max_colors": max_colors if limit_colors else None,
             "binary_alpha": binary_alpha,
             "palette_locked": bool(palette_path),
+            "crisp_edges": crisp_edges and not binary_alpha,
+            "repair_outline": repair_outline,
+            "outline_strength": outline_strength if repair_outline else None,
+            "outer_outline": outer_outline,
         },
     }
 
