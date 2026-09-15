@@ -27,19 +27,21 @@
           <small id="sourceName">No file selected</small>
         </label>
 
-        <div class="section-title">Pixel grid</div>
-        <label class="toggle-row"><input id="autoGrid" type="checkbox" checked /><span>Auto-detect source pixel grid</span></label>
+        <div class="section-title">Pixel recovery</div>
+        <label class="toggle-row"><input id="autoGrid" type="checkbox" checked /><span>High-quality native grid detection</span></label>
+        <small class="muted">Uses Pixel Art Fixer consensus detection. Manual scale is used only when auto recovery is disabled.</small>
         <div class="two-col">
-          <label>Scale X<input id="scaleX" type="number" min="1" max="64" value="1" /></label>
-          <label>Scale Y<input id="scaleY" type="number" min="1" max="64" value="1" /></label>
+          <label>Manual scale X<input id="scaleX" type="number" min="1" max="64" value="1" /></label>
+          <label>Manual scale Y<input id="scaleY" type="number" min="1" max="64" value="1" /></label>
         </div>
-        <label class="toggle-row"><input id="forceSize" type="checkbox" /><span>Force native output size</span></label>
+        <label class="toggle-row"><input id="forceSize" type="checkbox" /><span>Force exact output size</span></label>
         <div class="two-col" id="targetSizeFields">
           <label>Width<input id="targetWidth" type="number" min="1" max="2048" value="64" disabled /></label>
           <label>Height<input id="targetHeight" type="number" min="1" max="2048" value="64" disabled /></label>
         </div>
 
         <div class="section-title">Cleanup</div>
+        <label class="toggle-row"><input id="trimTransparent" type="checkbox" checked /><span>Trim transparent margins</span></label>
         <label>Maximum colors
           <div class="range-row"><input id="maxColors" type="range" min="2" max="64" value="24" /><output id="maxColorsValue">24</output></div>
         </label>
@@ -56,7 +58,7 @@
         <label class="file-button">Choose .hex palette<input id="paletteInput" type="file" accept=".hex,.txt" hidden /></label>
         <small id="paletteName" class="muted">Adaptive palette</small>
 
-        <button id="processButton" class="primary" disabled>Process asset</button>
+        <button id="processButton" class="primary" disabled>Recover asset</button>
         <div id="errorBox" class="error hidden"></div>
       </section>
 
@@ -67,7 +69,7 @@
             <div class="checker"><img id="sourcePreview" alt="Original preview" /></div>
           </article>
           <article class="preview-card accent-card">
-            <div class="preview-header"><span>Processed</span><span id="resultMeta">—</span></div>
+            <div class="preview-header"><span>Recovered native asset</span><span id="resultMeta">—</span></div>
             <div class="checker"><img id="resultPreview" alt="Processed preview" /></div>
           </article>
         </div>
@@ -76,8 +78,11 @@
           <article class="panel diagnostics">
             <div class="section-title">Diagnostics</div>
             <div class="metric-grid">
-              <div><span>Detected grid</span><strong id="metricGrid">—</strong></div>
+              <div><span>Recovery backend</span><strong id="metricBackend">—</strong></div>
+              <div><span>Source cell size</span><strong id="metricGrid">—</strong></div>
+              <div><span>Detected native grid</span><strong id="metricNative">—</strong></div>
               <div><span>Output size</span><strong id="metricSize">—</strong></div>
+              <div><span>Confidence</span><strong id="metricConfidence">—</strong></div>
               <div><span>Opaque colors</span><strong id="metricColors">—</strong></div>
               <div><span>Alpha levels</span><strong id="metricAlpha">—</strong></div>
               <div><span>Tiny components</span><strong id="metricTiny">—</strong></div>
@@ -87,7 +92,7 @@
 
           <article class="panel export-panel">
             <div class="section-title">Export</div>
-            <p>Result stays lossless PNG with nearest-neighbor pixel structure.</p>
+            <p>The preview is intentionally scaled with nearest-neighbor rendering. Judge recovery by native dimensions and a zoomed pixel view, not by whether the silhouette looks dramatically different.</p>
             <button id="downloadButton" class="secondary" disabled>Download PNG</button>
           </article>
         </div>
