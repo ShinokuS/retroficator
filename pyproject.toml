@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "retroficator"
-version = "0.1.0"
+version = "0.2.0"
 description = "AI-friendly pixel-art asset cleanup and normalization utility"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -16,6 +16,7 @@ dependencies = [
   "fastapi>=0.116",
   "uvicorn[standard]>=0.35",
   "python-multipart>=0.0.20",
+  "pixelfixer @ git+https://github.com/Retro-Diffusion/pixel-art-fixer.git@ef376e57e1c272633ca2dbf5f29ec3fcf6596465#subdirectory=python",
 ]
 
 [project.optional-dependencies]
