@@ -44,7 +44,7 @@
         <label class="toggle-row"><input id="trimTransparent" type="checkbox" checked /><span>Trim transparent margins</span></label>
 
         <label class="toggle-row"><input id="limitColors" type="checkbox" /><span>Limit output colors</span></label>
-        <small class="muted">Off by default: preserve recovered highlights, material texture and outline shades. Enable only when you deliberately want a smaller palette.</small>
+        <small class="muted">Off by default: preserve recovered highlights, material texture and outline shades.</small>
         <label>Maximum colors
           <div class="range-row"><input id="maxColors" type="range" min="2" max="128" value="24" disabled /><output id="maxColorsValue">24</output></div>
         </label>
@@ -55,10 +55,28 @@
         </label>
 
         <label class="toggle-row"><input id="binaryAlpha" type="checkbox" /><span>Force hard 0/255 alpha</span></label>
-        <small class="muted">Off by default. Hard alpha is useful for strict sprites but may thin dark one-pixel outlines on AI-generated transparent assets.</small>
+        <small class="muted">Usually leave this off. It can delete weak edge cells.</small>
         <label>Alpha threshold
           <div class="range-row"><input id="alphaThreshold" type="range" min="1" max="254" value="128" disabled /><output id="alphaThresholdValue">128</output></div>
         </label>
+
+        <div class="section-title">Outline</div>
+        <label class="toggle-row"><input id="crispEdges" type="checkbox" checked /><span>Preserve crisp silhouette</span></label>
+        <small class="muted">Promotes genuine recovered edge cells instead of deleting them with a hard alpha cut.</small>
+        <label>Edge alpha sensitivity
+          <div class="range-row"><input id="edgeAlphaThreshold" type="range" min="1" max="96" value="18" /><output id="edgeAlphaThresholdValue">18</output></div>
+        </label>
+
+        <label class="toggle-row"><input id="repairOutline" type="checkbox" checked /><span>Repair weak/missing outline</span></label>
+        <small class="muted">Follows nearby existing outline pixels; it does not paint a blanket black stroke.</small>
+        <label>Repair strength
+          <div class="range-row"><input id="outlineStrength" type="range" min="0" max="100" value="70" /><output id="outlineStrengthValue">70</output></div>
+        </label>
+
+        <label>Extra outer outline
+          <div class="range-row"><input id="outerOutline" type="range" min="0" max="2" value="0" step="1" /><output id="outerOutlineValue">0 px</output></div>
+        </label>
+        <small class="muted">0 = only repair the original outline. 1–2 px deliberately adds a new external border.</small>
 
         <div class="section-title">Project palette</div>
         <label class="file-button">Choose .hex palette<input id="paletteInput" type="file" accept=".hex,.txt" hidden /></label>
@@ -98,7 +116,7 @@
 
           <article class="panel export-panel">
             <div class="section-title">Export</div>
-            <p>Recovery now defaults to a fidelity-first pass: native grid reconstruction without a second palette clamp or hard-alpha cut. Add those constraints only after the recovered sprite looks right.</p>
+            <p>Default recovery is fidelity-first: preserve source colors, keep soft alpha where useful, then repair only broken silhouette/outline cells.</p>
             <button id="downloadButton" class="secondary" disabled>Download PNG</button>
           </article>
         </div>
