@@ -13,14 +13,19 @@ authors = [{name = "ShinokuS"}]
 dependencies = [
   "numpy>=2.0",
   "Pillow>=11.0",
+  "fastapi>=0.116",
+  "uvicorn[standard]>=0.35",
+  "python-multipart>=0.0.20",
 ]
 
 [project.optional-dependencies]
 gui = ["PySide6>=6.8"]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "httpx>=0.28"]
 
 [project.scripts]
 retroficator = "retroficator.app:main"
+retroficator-web = "retroficator.web.server:run_web"
+retroficator-desktop = "retroficator.app:desktop_main"
 retroficator-cli = "retroficator.cli:main"
 
 [tool.pytest.ini_options]
@@ -29,3 +34,6 @@ addopts = "-q"
 
 [tool.setuptools.packages.find]
 include = ["retroficator*"]
+
+[tool.setuptools.package-data]
+retroficator = ["web/static/*"]
